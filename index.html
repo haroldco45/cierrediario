@@ -188,6 +188,20 @@ select.entrada{font-size:.95rem;appearance:none;background-image:url("data:image
 .dia-item .g.pos{color:var(--verde)}
 .dia-item .g.neg{color:var(--gasto)}
 
+/* ---------- Desglose por categoría ---------- */
+.cat-fila{margin-bottom:12px}
+.cat-fila:last-child{margin-bottom:0}
+.cat-fila .encima{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.cat-fila .nombre{font-weight:700;font-size:.88rem}
+.cat-fila .cifra{font-weight:800;font-size:.92rem}
+.cat-fila .pct{font-size:.72rem;color:var(--gris);font-weight:700;margin-left:6px}
+.cat-fila .pista{height:10px;border-radius:6px;background:var(--fondo);overflow:hidden}
+.cat-fila .relleno{height:100%;border-radius:6px;min-width:3px}
+.cat-fila.ing .relleno{background:var(--verde)}
+.cat-fila.ing .cifra{color:var(--verde)}
+.cat-fila.gas .relleno{background:var(--gasto)}
+.cat-fila.gas .cifra{color:var(--gasto)}
+
 /* ---------- Ajustes ---------- */
 .caja-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--linea)}
 .caja-item:last-child{border-bottom:none}
@@ -356,6 +370,16 @@ footer{
   </div>
 
   <div class="carta">
+    <h3><span class="punto verde"></span> ¿De dónde entró la plata?</h3>
+    <div id="cats-ingresos"><div class="vacio">Sin datos todavía</div></div>
+  </div>
+
+  <div class="carta">
+    <h3><span class="punto rojo"></span> ¿En qué se fue la plata?</h3>
+    <div id="cats-gastos"><div class="vacio">Sin datos todavía</div></div>
+  </div>
+
+  <div class="carta">
     <h3>🗓️ Detalle por día</h3>
     <div id="lista-dias"><div class="vacio">Todavía no hay cierres guardados</div></div>
   </div>
@@ -494,6 +518,7 @@ footer{
       <div class="cuerpo">
         <p>Muestra los últimos 30 días con todas las cajas sumadas: cuánto vendiste, gastaste y ganaste.</p>
         <p>En la gráfica, cada barra es un día. La <b>dorada</b> es tu mejor día; si sale <b>roja</b>, ese día gastaste más de lo que vendiste. Toca cualquier día de la lista para ver su detalle completo.</p>
+        <p><b>¿De dónde entró y en qué se fue la plata?</b> Estas dos secciones te muestran el total de cada categoría en el mes, ordenado de mayor a menor y con su porcentaje. Así sabes qué te da más plata y qué te la consume: la base perfecta para armar tu presupuesto.</p>
       </div>
     </details>
 
@@ -804,6 +829,39 @@ function pintarHistorial(){
         <div class="g num ${s.gan>=0?'pos':'neg'}">${fmt(s.gan)}</div>
       </div>`).join('')
     : '<div class="vacio">Todavía no hay cierres guardados</div>';
+
+  pintarCategoriasHistorial(fechas);
+}
+
+function pintarCategoriasHistorial(fechas){
+  // Acumular por categoría en la ventana de 30 días, todas las cajas
+  const accIng={}, accGas={};
+  fechas.forEach(f=>{
+    Object.values(datos[f]||{}).forEach(c=>{
+      c.ingresos.forEach(m=>accIng[m.cat]=(accIng[m.cat]||0)+m.monto);
+      c.gastos.forEach(m=>accGas[m.cat]=(accGas[m.cat]||0)+m.monto);
+    });
+  });
+  const pinta=(acc,idCont,clase)=>{
+    const cont=document.getElementById(idCont);
+    const pares=Object.entries(acc).sort((a,b)=>b[1]-a[1]);
+    if(!pares.length){ cont.innerHTML='<div class="vacio">Sin datos todavía</div>'; return; }
+    const total=pares.reduce((s,p)=>s+p[1],0);
+    const max=pares[0][1];
+    cont.innerHTML=pares.map(([cat,v])=>{
+      const pct=Math.round(v/total*100);
+      return `<div class="cat-fila ${clase}">
+        <div class="encima">
+          <span class="nombre">${cat}<span class="pct">${pct}%</span></span>
+          <span class="cifra num">${fmt(v)}</span>
+        </div>
+        <div class="pista"><div class="relleno" style="width:${Math.max(3,Math.round(v/max*100))}%"></div></div>
+      </div>`;
+    }).join('')
+    +`<div class="total-linea"><span>Total</span><span class="num" style="color:var(--${clase==='ing'?'verde':'gasto'})">${fmt(total)}</span></div>`;
+  };
+  pinta(accIng,'cats-ingresos','ing');
+  pinta(accGas,'cats-gastos','gas');
 }
 
 function verDia(fecha){
