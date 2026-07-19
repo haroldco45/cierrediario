@@ -215,6 +215,25 @@ nav button svg{width:26px;height:26px}
 .fila2{display:flex;gap:10px}
 .fila2>*{flex:1}
 
+/* ---------- Ayuda (manual dentro de la app) ---------- */
+.ayuda details{border:1px solid var(--linea);border-radius:12px;margin-bottom:10px;background:#fff;overflow:hidden}
+.ayuda summary{
+  list-style:none;cursor:pointer;padding:14px;font-weight:800;font-size:.95rem;
+  display:flex;align-items:center;gap:10px;color:var(--verde-osc);
+}
+.ayuda summary::-webkit-details-marker{display:none}
+.ayuda summary::after{content:"＋";margin-left:auto;color:var(--oro);font-weight:900;font-size:1.1rem}
+.ayuda details[open] summary::after{content:"−"}
+.ayuda details[open] summary{background:var(--verde-suave)}
+.ayuda .cuerpo{padding:0 14px 14px;font-size:.88rem;line-height:1.55;color:var(--tinta)}
+.ayuda .cuerpo p{margin-bottom:8px}
+.ayuda .cuerpo b{color:var(--verde-osc)}
+.ayuda .pasito{display:flex;gap:10px;margin-bottom:8px}
+.ayuda .pasito .n{flex:0 0 24px;height:24px;border-radius:8px;background:var(--verde);color:#fff;font-weight:800;font-size:.8rem;display:flex;align-items:center;justify-content:center}
+.ayuda .notita{border-radius:10px;padding:10px 12px;font-size:.82rem;font-weight:600;margin-top:8px}
+.ayuda .notita.tip{background:var(--oro-suave);color:#6B5210}
+.ayuda .notita.ojo{background:var(--gasto-suave);color:var(--gasto)}
+
 /* ---------- Aviso flotante ---------- */
 #aviso{
   position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);
@@ -256,7 +275,11 @@ footer{
     <div class="negocio" id="h-negocio">Mi negocio</div>
     <div class="fecha" id="h-fecha"></div>
   </div>
-  <div style="font-size:1.6rem">🏪</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onclick="document.getElementById('modal-ayuda').classList.add('abierto')" aria-label="Ayuda"
+      style="width:38px;height:38px;border-radius:50%;border:2px solid var(--oro);background:none;color:var(--oro);font-weight:900;font-size:1.15rem;cursor:pointer;font-family:inherit">?</button>
+    <div style="font-size:1.6rem">🏪</div>
+  </div>
 </header>
 
 <main>
@@ -358,6 +381,12 @@ footer{
   </div>
 
   <div class="carta">
+    <h3>🏷️ Mis categorías</h3>
+    <p class="sub" style="margin-bottom:10px">Las que has creado tú. Se agregan nuevas desde "+ Agregar ingreso" o "+ Agregar gasto". Si quitas una, los cierres viejos no cambian.</p>
+    <div id="lista-cats"></div>
+  </div>
+
+  <div class="carta">
     <h3>☁️ Copia de seguridad</h3>
     <p class="sub" style="margin-bottom:12px">Tus datos viven solo en este celular. Descarga una copia cada semana y guárdala en tu correo o Drive.</p>
     <button class="btn borde" onclick="exportar()">⬇️ Descargar copia (.json)</button>
@@ -398,7 +427,8 @@ footer{
   <div class="hoja">
     <h3 id="mov-titulo">Agregar ingreso</h3>
     <label class="campo">¿De qué tipo?</label>
-    <select class="entrada" id="mov-cat" style="margin-bottom:12px"></select>
+    <select class="entrada" id="mov-cat" style="margin-bottom:12px" onchange="catCambiada()"></select>
+    <input class="entrada" id="mov-cat-nueva" placeholder="Escribe el nombre de la nueva categoría" maxlength="30" style="display:none;font-size:.95rem;margin-bottom:12px;border-color:var(--oro)">
     <label class="campo">Detalle (opcional)</label>
     <input class="entrada" id="mov-desc" placeholder="Ej: pedido doña Rosa" maxlength="60" style="font-size:.95rem;margin-bottom:12px">
     <label class="campo">¿Cuánto?</label>
@@ -411,6 +441,95 @@ footer{
 <!-- MODAL DETALLE DÍA -->
 <div class="velo" id="modal-dia" onclick="if(event.target===this)this.classList.remove('abierto')">
   <div class="hoja" id="dia-contenido"></div>
+</div>
+
+<!-- MODAL AYUDA / MANUAL -->
+<div class="velo" id="modal-ayuda" onclick="if(event.target===this)this.classList.remove('abierto')">
+  <div class="hoja ayuda">
+    <h3>📗 Manual de uso</h3>
+    <p class="sub" style="margin-bottom:14px">Toca cualquier tema para ver la explicación</p>
+
+    <details>
+      <summary>🏪 ¿Qué es Cierre Diario?</summary>
+      <div class="cuerpo">
+        <p>Una app para <b>cuadrar la caja de tu negocio todos los días</b>. Cierras la tienda, anotas lo que entró y salió, y la app te dice cuánto ganaste y si la caja cuadró.</p>
+        <p>✔ Funciona sin internet · ✔ Tus datos quedan solo en este celular · ✔ Maneja varias cajas · ✔ Historial de 30 días</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>📝 Hacer el cierre del día</summary>
+      <div class="cuerpo">
+        <div class="pasito"><div class="n">1</div><div><b>Elige la caja</b> arriba (si tienes varias). La que ya cerró aparece con ✔.</div></div>
+        <div class="pasito"><div class="n">2</div><div><b>Saldo inicial:</b> la plata con la que arrancaste el día (la base).</div></div>
+        <div class="pasito"><div class="n">3</div><div><b>Ingresos:</b> toca "+ Agregar ingreso", elige el tipo, el detalle si quieres, y el valor. Agrega todos los que necesites.</div></div>
+        <div class="pasito"><div class="n">4</div><div><b>Gastos:</b> igual, con "+ Agregar gasto". Anota TODO lo que salió de la caja, hasta el gasto personal.</div></div>
+        <div class="pasito"><div class="n">5</div><div><b>Cuenta el efectivo</b> que hay en la caja y escríbelo: la app te dice si cuadró, sobra o falta.</div></div>
+        <div class="pasito"><div class="n">6</div><div><b>Guarda el cierre</b> con el botón verde. ¡Aparece tu billete de ganancia!</div></div>
+        <div class="notita tip">💡 ¿Te equivocaste en un movimiento? Tócale la ✕ roja y desaparece. ¿Ya guardaste? Corrige lo que sea y vuelve a guardar el mismo día: se reemplaza.</div>
+      </div>
+    </details>
+
+    <details>
+      <summary>🏷️ Crear mis propias categorías</summary>
+      <div class="cuerpo">
+        <p>Al agregar un ingreso o gasto, en la lista de tipos elige <b>"➕ Crear nueva categoría…"</b>, escribe el nombre (ej: "Venta de minutos", "Hielo") y listo: queda guardada para siempre.</p>
+        <p>Puedes ver y quitar tus categorías en <b>Ajustes → Mis categorías</b>. Los cierres viejos no cambian.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>💵 Entender el cuadre de caja</summary>
+      <div class="cuerpo">
+        <p><b>Debe haber en caja</b> = saldo inicial + ingresos − gastos.</p>
+        <p>✅ <b>Cuadrada:</b> la plata contada es exacta. ¡Perfecto!</p>
+        <p>🟡 <b>Sobrante:</b> hay más de la cuenta. Casi siempre es un ingreso sin anotar o un vuelto mal dado.</p>
+        <p>🔴 <b>Faltante:</b> hay menos. Revisa si faltó anotar un gasto, un fiado o un vuelto de más.</p>
+        <div class="notita tip">💡 La plata de Nequi/Daviplata no está en el cajón: por eso existe su categoría aparte.</div>
+      </div>
+    </details>
+
+    <details>
+      <summary>📈 La pestaña Historial</summary>
+      <div class="cuerpo">
+        <p>Muestra los últimos 30 días con todas las cajas sumadas: cuánto vendiste, gastaste y ganaste.</p>
+        <p>En la gráfica, cada barra es un día. La <b>dorada</b> es tu mejor día; si sale <b>roja</b>, ese día gastaste más de lo que vendiste. Toca cualquier día de la lista para ver su detalle completo.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🧾 Manejar varias cajas</summary>
+      <div class="cuerpo">
+        <p>En <b>Ajustes → Cajas</b> agrega las que necesites (ej: "Mostrador", "Caja de Marta"). Cada una se cuadra por aparte en la pestaña Hoy, y en el Historial se suman todas.</p>
+        <p>Si quitas una caja, los cierres viejos no se borran.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>☁️ Copia de seguridad (¡importante!)</summary>
+      <div class="cuerpo">
+        <p>Tus datos viven solo en este celular. Si se pierde o se daña, se pierden los cierres. Para protegerte:</p>
+        <div class="pasito"><div class="n">1</div><div>Una vez por semana: <b>Ajustes → Descargar copia (.json)</b>.</div></div>
+        <div class="pasito"><div class="n">2</div><div>Mándate el archivo a tu WhatsApp, correo o Drive.</div></div>
+        <div class="pasito"><div class="n">3</div><div>En un celular nuevo: <b>Ajustes → Restaurar copia</b> y todo vuelve.</div></div>
+        <div class="notita ojo">⚠️ "Borrar todos los datos" elimina todo y no hay marcha atrás.</div>
+      </div>
+    </details>
+
+    <details>
+      <summary>❓ Preguntas frecuentes</summary>
+      <div class="cuerpo">
+        <p><b>¿Necesito internet?</b> Solo para instalarla. Después funciona sin señal.</p>
+        <p><b>¿Me cobran mensualidad?</b> No.</p>
+        <p><b>¿Alguien ve mis números?</b> No, nada viaja a internet.</p>
+        <p><b>¿Y si un día no cierro?</b> No pasa nada, queda vacío. Pero el hábito diario es el secreto: ¡3 minutos!</p>
+      </div>
+    </details>
+
+    <a class="btn borde" style="text-decoration:none;margin-top:4px" href="https://haroldco45.github.io/cierrediario/manual-usuario-cierre-diario.pdf" target="_blank" rel="noopener">⬇️ Descargar manual completo (PDF)</a>
+    <button class="btn primario" onclick="document.getElementById('modal-ayuda').classList.remove('abierto')">Entendido</button>
+    <p class="sub" style="text-align:center;margin-top:12px">Desarrollada por Vibras Positivas HM<br>Derechos de Autor Reservados</p>
+  </div>
 </div>
 
 <div id="aviso"></div>
@@ -457,9 +576,13 @@ const CATS_GAS=['Mercancía / Proveedores','Servicios (luz, agua…)','Arriendo'
 function cargar(){
   cfg=JSON.parse(localStorage.getItem(CLAVE_CFG)||'null');
   datos=JSON.parse(localStorage.getItem(CLAVE_DATOS)||'{}');
+  if(cfg){ // migración: usuarios antiguos sin categorías propias
+    if(!cfg.catsIng) cfg.catsIng=[];
+    if(!cfg.catsGas) cfg.catsGas=[];
+  }
   if(!cfg){
     document.getElementById('bienvenida').classList.add('abierto');
-    cfg={negocio:'Mi negocio',cajas:[{id:'c1',nombre:'Caja 1'}]};
+    cfg={negocio:'Mi negocio',cajas:[{id:'c1',nombre:'Caja 1'}],catsIng:[],catsGas:[]};
   }
   cajaActiva=cfg.cajas[0].id;
 }
@@ -531,22 +654,42 @@ function pintarMovs(){
 function suma(l){ return l.reduce((s,m)=>s+m.monto,0); }
 function quitarMov(tipo,i){ borrador[tipo].splice(i,1); pintarMovs(); }
 
+function catsDe(tipo){
+  return tipo==='ingreso' ? CATS_ING.concat(cfg.catsIng||[]) : CATS_GAS.concat(cfg.catsGas||[]);
+}
 function abrirMov(tipo){
   tipoMov=tipo;
   document.getElementById('mov-titulo').textContent= tipo==='ingreso'?'Agregar ingreso':'Agregar gasto';
   document.getElementById('mov-guardar').className='btn '+(tipo==='ingreso'?'primario':'peligro');
-  const cats=tipo==='ingreso'?CATS_ING:CATS_GAS;
-  document.getElementById('mov-cat').innerHTML=cats.map(c=>`<option>${c}</option>`).join('');
+  document.getElementById('mov-cat').innerHTML=
+    catsDe(tipo).map(c=>`<option>${c}</option>`).join('')
+    +'<option value="__nueva__">➕ Crear nueva categoría…</option>';
+  document.getElementById('mov-cat-nueva').style.display='none';
+  document.getElementById('mov-cat-nueva').value='';
   document.getElementById('mov-desc').value='';
   document.getElementById('mov-monto').value='';
   document.getElementById('modal-mov').classList.add('abierto');
   setTimeout(()=>document.getElementById('mov-monto').focus(),150);
 }
+function catCambiada(){
+  const nueva=document.getElementById('mov-cat').value==='__nueva__';
+  const el=document.getElementById('mov-cat-nueva');
+  el.style.display=nueva?'block':'none';
+  if(nueva) setTimeout(()=>el.focus(),100);
+}
 function cerrarMov(){ document.getElementById('modal-mov').classList.remove('abierto'); }
 function guardarMov(){
   const monto=leerMonto(document.getElementById('mov-monto'));
   if(!monto){ aviso('Escribe el valor 💵'); return; }
-  const m={cat:document.getElementById('mov-cat').value,desc:document.getElementById('mov-desc').value.trim(),monto};
+  let cat=document.getElementById('mov-cat').value;
+  if(cat==='__nueva__'){
+    cat=document.getElementById('mov-cat-nueva').value.trim();
+    if(!cat){ aviso('Escribe el nombre de la categoría'); return; }
+    const lista=tipoMov==='ingreso'?'catsIng':'catsGas';
+    const yaExiste=catsDe(tipoMov).some(c=>c.toLowerCase()===cat.toLowerCase());
+    if(!yaExiste){ cfg[lista].push(cat); guardarCfg(); aviso('Categoría "'+cat+'" creada ✅'); }
+  }
+  const m={cat,desc:document.getElementById('mov-desc').value.trim(),monto};
   borrador[tipoMov==='ingreso'?'ingresos':'gastos'].push(m);
   cerrarMov(); pintarMovs();
 }
@@ -691,6 +834,22 @@ function pintarAjustes(){
       <span>🧾 ${c.nombre}</span>
       ${cfg.cajas.length>1?`<button class="btn peligro mini" onclick="quitarCaja('${c.id}')">Quitar</button>`:''}
     </div>`).join('');
+  pintarCats();
+}
+function pintarCats(){
+  const filas=[];
+  (cfg.catsIng||[]).forEach((c,i)=>filas.push(`
+    <div class="caja-item"><span style="color:var(--verde)">💵 ${c}</span>
+    <button class="btn peligro mini" onclick="quitarCat('catsIng',${i})">Quitar</button></div>`));
+  (cfg.catsGas||[]).forEach((c,i)=>filas.push(`
+    <div class="caja-item"><span style="color:var(--gasto)">💸 ${c}</span>
+    <button class="btn peligro mini" onclick="quitarCat('catsGas',${i})">Quitar</button></div>`));
+  document.getElementById('lista-cats').innerHTML= filas.length? filas.join('')
+    : '<div class="vacio">Todavía no has creado categorías propias</div>';
+}
+function quitarCat(lista,i){
+  if(!confirm('¿Quitar la categoría "'+cfg[lista][i]+'"? Los cierres ya guardados no cambian.')) return;
+  cfg[lista].splice(i,1); guardarCfg(); pintarCats(); aviso('Categoría eliminada');
 }
 function guardarNegocio(){
   const n=document.getElementById('aj-negocio').value.trim();
