@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cierre Diario — Tu negocio en orden</title>
+<meta name="description" content="Cierra la caja de tu negocio en 3 minutos desde el celular. Ingresos, gastos, saldo inicial y ganancia del día. Todo guardado en tu teléfono.">
+
+<!-- Open Graph (obligatorio) -->
+<meta property="og:title" content="Cierre Diario — Tu negocio en orden">
+<meta property="og:description" content="Cierra la caja de tu tienda en 3 minutos. Ingresos, gastos y ganancia del día, todo desde el celular y sin internet.">
+<meta property="og:image" content="https://haroldco45.github.io/cierre-diario/og-cierre-diario.png">
+<meta property="og:url" content="https://haroldco45.github.io/cierre-diario/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vibras Positivas HM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cierre Diario — Tu negocio en orden">
+<meta name="twitter:image" content="https://haroldco45.github.io/cierre-diario/og-cierre-diario.png">
+
+<!-- PWA -->
+<meta name="theme-color" content="#0B5E3B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cierre Diario">
+<link rel="manifest" href='data:application/manifest+json,{"name":"Cierre Diario","short_name":"Cierre","start_url":".","display":"standalone","background_color":"%23F4F6F1","theme_color":"%230B5E3B","icons":[{"src":"data:image/svg+xml,%253Csvg xmlns=%2527http://www.w3.org/2000/svg%2527 viewBox=%25270 0 100 100%2527%253E%253Crect width=%2527100%2527 height=%2527100%2527 rx=%252722%2527 fill=%2527%25230B5E3B%2527/%253E%253Ctext x=%252750%2527 y=%252768%2527 font-size=%252752%2527 text-anchor=%2527middle%2527 fill=%2527%2523C99A2E%2527 font-family=%2527sans-serif%2527 font-weight=%2527bold%2527%253E$%253C/text%253E%253C/svg%253E","sizes":"any","type":"image/svg+xml"}]}'>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230B5E3B'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='%23C99A2E' font-family='sans-serif' font-weight='bold'%3E$%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --fondo:#F4F6F1;
+  --carta:#FFFFFF;
+  --tinta:#16211B;
+  --gris:#66736B;
+  --linea:#DFE5DD;
+  --verde:#0B5E3B;
+  --verde-osc:#07402A;
+  --verde-suave:#E4F0E8;
+  --oro:#C99A2E;
+  --oro-suave:#F6EDD8;
+  --gasto:#A9402F;
+  --gasto-suave:#F6E4DF;
+  --radio:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:17px}
+body{
+  font-family:'Archivo',system-ui,-apple-system,sans-serif;
+  background:var(--fondo);color:var(--tinta);
+  min-height:100vh;padding-bottom:88px;
+}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+
+/* ---------- Encabezado ---------- */
+header{
+  background:var(--verde);color:#fff;
+  padding:calc(14px + env(safe-area-inset-top)) 20px 14px;
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:20;
+}
+header .negocio{font-weight:800;font-size:1.05rem}
+header .fecha{font-size:.78rem;opacity:.85;font-weight:600}
+
+/* ---------- Contenido ---------- */
+main{padding:18px 16px 24px;max-width:520px;margin:0 auto}
+.vista{display:none}
+.vista.activa{display:block;animation:entra .18s ease}
+@keyframes entra{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+h2.titulo{font-size:1.25rem;font-weight:800;margin-bottom:4px}
+p.sub{color:var(--gris);font-size:.85rem;margin-bottom:16px}
+
+/* ---------- Chips de cajas ---------- */
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;border:2px solid var(--linea);background:var(--carta);
+  color:var(--tinta);border-radius:999px;padding:10px 18px;
+  font-weight:700;font-size:.9rem;font-family:inherit;cursor:pointer;
+}
+.chip.activo{border-color:var(--verde);background:var(--verde);color:#fff}
+.chip .ok{color:var(--oro);margin-left:4px}
+.chip.activo .ok{color:var(--oro)}
+
+/* ---------- Tarjetas ---------- */
+.carta{background:var(--carta);border:1px solid var(--linea);border-radius:var(--radio);padding:16px;margin-bottom:14px}
+.carta h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gris);font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.punto{width:10px;height:10px;border-radius:3px;display:inline-block}
+.punto.verde{background:var(--verde)}
+.punto.oro{background:var(--oro)}
+.punto.rojo{background:var(--gasto)}
+
+/* ---------- Campos ---------- */
+label.campo{display:block;font-size:.8rem;font-weight:700;color:var(--gris);margin-bottom:6px}
+.entrada{
+  width:100%;border:2px solid var(--linea);border-radius:12px;
+  padding:14px;font-size:1.15rem;font-weight:700;font-family:inherit;
+  background:#fff;color:var(--tinta);
+}
+.entrada:focus{outline:none;border-color:var(--verde)}
+.entrada.dinero{text-align:right}
+textarea.entrada{font-size:.95rem;font-weight:400;min-height:70px;resize:vertical}
+select.entrada{font-size:.95rem;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%2366736B' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+
+/* ---------- Filas de movimientos ---------- */
+.mov{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px dashed var(--linea)}
+.mov:last-child{border-bottom:none}
+.mov .info{flex:1;min-width:0}
+.mov .cat{font-weight:700;font-size:.9rem}
+.mov .desc{font-size:.78rem;color:var(--gris);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mov .monto{font-weight:800;font-size:1rem}
+.mov .monto.ing{color:var(--verde)}
+.mov .monto.gas{color:var(--gasto)}
+.mov button.quitar{
+  border:none;background:var(--gasto-suave);color:var(--gasto);
+  width:34px;height:34px;border-radius:10px;font-size:1.1rem;font-weight:800;cursor:pointer;flex:0 0 auto;
+}
+.vacio{color:var(--gris);font-size:.85rem;text-align:center;padding:8px 0}
+
+.total-linea{display:flex;justify-content:space-between;padding-top:12px;margin-top:6px;border-top:2px solid var(--linea);font-weight:800}
+.total-linea .num{font-size:1.15rem}
+
+/* ---------- Botones ---------- */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;border:none;border-radius:14px;padding:16px;
+  font-family:inherit;font-size:1.05rem;font-weight:800;cursor:pointer;
+}
+.btn.primario{background:var(--verde);color:#fff}
+.btn.primario:active{background:var(--verde-osc)}
+.btn.suave{background:var(--verde-suave);color:var(--verde)}
+.btn.oro{background:var(--oro);color:#fff}
+.btn.borde{background:#fff;border:2px solid var(--linea);color:var(--tinta)}
+.btn.peligro{background:var(--gasto-suave);color:var(--gasto)}
+.btn.mini{width:auto;padding:10px 16px;font-size:.85rem;border-radius:10px}
+.btn+.btn{margin-top:10px}
+.btn:disabled{opacity:.5}
+
+/* ---------- Billete de ganancia (firma visual) ---------- */
+.billete{
+  position:relative;border-radius:var(--radio);overflow:hidden;
+  background:
+    repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 2px,transparent 2px 9px),
+    radial-gradient(circle at 85% 15%,rgba(201,154,46,.35),transparent 55%),
+    linear-gradient(135deg,var(--verde) 0%,var(--verde-osc) 100%);
+  color:#fff;padding:20px;margin-bottom:14px;
+  border:1px solid var(--verde-osc);
+}
+.billete::before{
+  content:"";position:absolute;inset:8px;border:1px solid rgba(255,255,255,.25);
+  border-radius:10px;pointer-events:none;
+}
+.billete .serie{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;opacity:.8;font-weight:700}
+.billete .valor{font-size:2.3rem;font-weight:900;margin:6px 0 2px;line-height:1}
+.billete .valor.negativo{color:#FFB4A4}
+.billete .detalle{display:flex;justify-content:space-between;margin-top:14px;font-size:.78rem;font-weight:600}
+.billete .detalle b{display:block;font-size:1rem;font-weight:800}
+.billete .sello{
+  position:absolute;top:14px;right:16px;width:44px;height:44px;border-radius:50%;
+  border:2px solid var(--oro);color:var(--oro);display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:1.3rem;transform:rotate(8deg);
+}
+
+/* ---------- Diferencia de caja ---------- */
+.dif{border-radius:12px;padding:12px 14px;font-weight:700;font-size:.9rem;margin-top:10px;display:none}
+.dif.ok{display:block;background:var(--verde-suave);color:var(--verde)}
+.dif.sobra{display:block;background:var(--oro-suave);color:#8A6A1D}
+.dif.falta{display:block;background:var(--gasto-suave);color:var(--gasto)}
+
+/* ---------- Historial ---------- */
+.resumen3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.resumen3 .cel{background:var(--carta);border:1px solid var(--linea);border-radius:12px;padding:12px 10px;text-align:center}
+.resumen3 .cel small{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--gris);font-weight:800;margin-bottom:4px}
+.resumen3 .cel b{font-size:.92rem;font-weight:800}
+.grafica{display:flex;align-items:flex-end;gap:3px;height:120px;padding:8px 0 0}
+.grafica .barra{flex:1;background:var(--verde);border-radius:4px 4px 0 0;min-height:3px;position:relative}
+.grafica .barra.neg{background:var(--gasto)}
+.grafica .barra.mejor{background:var(--oro)}
+.eje{display:flex;justify-content:space-between;font-size:.68rem;color:var(--gris);font-weight:600;margin-top:6px}
+.dia-item{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px dashed var(--linea);cursor:pointer}
+.dia-item:last-child{border-bottom:none}
+.dia-item .f{font-weight:700;font-size:.92rem}
+.dia-item .c{font-size:.75rem;color:var(--gris)}
+.dia-item .g{font-weight:800}
+.dia-item .g.pos{color:var(--verde)}
+.dia-item .g.neg{color:var(--gasto)}
+
+/* ---------- Ajustes ---------- */
+.caja-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--linea)}
+.caja-item:last-child{border-bottom:none}
+.caja-item span{flex:1;font-weight:700}
+
+/* ---------- Navegación inferior ---------- */
+nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:30;
+  background:var(--carta);border-top:1px solid var(--linea);
+  display:flex;padding-bottom:env(safe-area-inset-bottom);
+}
+nav button{
+  flex:1;border:none;background:none;padding:10px 0 12px;cursor:pointer;
+  font-family:inherit;font-size:.7rem;font-weight:800;color:var(--gris);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+nav button.activo{color:var(--verde)}
+nav button svg{width:26px;height:26px}
+
+/* ---------- Modal ---------- */
+.velo{position:fixed;inset:0;background:rgba(22,33,27,.55);z-index:40;display:none;align-items:flex-end;justify-content:center}
+.velo.abierto{display:flex}
+.hoja{background:var(--carta);border-radius:20px 20px 0 0;width:100%;max-width:520px;padding:20px 18px calc(20px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto}
+.hoja h3{font-size:1.1rem;font-weight:800;margin-bottom:14px}
+.fila2{display:flex;gap:10px}
+.fila2>*{flex:1}
+
+/* ---------- Aviso flotante ---------- */
+#aviso{
+  position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);
+  background:var(--tinta);color:#fff;padding:12px 20px;border-radius:12px;
+  font-weight:700;font-size:.88rem;opacity:0;pointer-events:none;transition:.25s;z-index:60;white-space:nowrap;
+}
+#aviso.ver{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- Onboarding ---------- */
+#bienvenida{position:fixed;inset:0;background:var(--verde);color:#fff;z-index:50;display:none;flex-direction:column;justify-content:center;padding:32px 26px}
+#bienvenida.abierto{display:flex}
+#bienvenida .logo{font-size:2.6rem;margin-bottom:10px}
+#bienvenida h1{font-size:1.7rem;font-weight:900;line-height:1.15;margin-bottom:8px}
+#bienvenida p{opacity:.85;margin-bottom:26px;font-size:.95rem}
+#bienvenida .entrada{border-color:transparent;margin-bottom:14px}
+
+footer{
+  text-align:center;font-size:.7rem;color:var(--gris);
+  padding:10px 16px 20px;font-weight:600;
+}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div id="bienvenida">
+  <div class="logo">🏪</div>
+  <h1>Cierra tu caja en 3 minutos</h1>
+  <p>Anota lo que entró y lo que salió hoy. Tu ganancia queda guardada en este celular, sin internet y sin enredos.</p>
+  <input class="entrada" id="ob-negocio" placeholder="¿Cómo se llama tu negocio?" maxlength="40">
+  <button class="btn oro" onclick="terminarBienvenida()">Empezar</button>
+  <footer style="color:rgba(255,255,255,.75);margin-top:20px">Desarrollada por Vibras Positivas HM — Derechos de Autor Reservados</footer>
+</div>
+
+<header>
+  <div>
+    <div class="negocio" id="h-negocio">Mi negocio</div>
+    <div class="fecha" id="h-fecha"></div>
+  </div>
+  <div style="font-size:1.6rem">🏪</div>
+</header>
+
+<main>
+
+<!-- ============ VISTA HOY ============ -->
+<section class="vista activa" id="v-hoy">
+  <h2 class="titulo">Cierre de hoy</h2>
+  <p class="sub">Bajaste las puertas… ahora cuadremos la caja 💪</p>
+
+  <div class="chips" id="chips-cajas"></div>
+
+  <div class="carta">
+    <h3><span class="punto oro"></span> Saldo inicial (base de caja)</h3>
+    <input class="entrada dinero num" id="in-base" inputmode="numeric" placeholder="$ 0" autocomplete="off">
+  </div>
+
+  <div class="carta">
+    <h3><span class="punto verde"></span> Ingresos del día</h3>
+    <div id="lista-ingresos"><div class="vacio">Aún no has anotado ingresos</div></div>
+    <div class="total-linea"><span>Total ingresos</span><span class="num" id="tot-ing" style="color:var(--verde)">$ 0</span></div>
+    <button class="btn suave" style="margin-top:12px" onclick="abrirMov('ingreso')">＋ Agregar ingreso</button>
+  </div>
+
+  <div class="carta">
+    <h3><span class="punto rojo"></span> Gastos del día</h3>
+    <div id="lista-gastos"><div class="vacio">Aún no has anotado gastos</div></div>
+    <div class="total-linea"><span>Total gastos</span><span class="num" id="tot-gas" style="color:var(--gasto)">$ 0</span></div>
+    <button class="btn peligro" style="margin-top:12px" onclick="abrirMov('gasto')">＋ Agregar gasto</button>
+  </div>
+
+  <div class="carta">
+    <h3><span class="punto oro"></span> Efectivo contado al cerrar <small style="text-transform:none;font-weight:600">(opcional)</small></h3>
+    <input class="entrada dinero num" id="in-contado" inputmode="numeric" placeholder="$ 0" autocomplete="off">
+    <div class="dif" id="dif-caja"></div>
+  </div>
+
+  <div class="carta">
+    <h3>📝 Notas del día</h3>
+    <textarea class="entrada" id="in-notas" placeholder="Ej: llegó pedido de Colombina, se fue la luz 2 horas…"></textarea>
+  </div>
+
+  <div class="billete" id="billete" style="display:none">
+    <div class="sello">$</div>
+    <div class="serie" id="b-serie">Ganancia del día</div>
+    <div class="valor num" id="b-valor">$ 0</div>
+    <div style="font-size:.75rem;opacity:.85" id="b-caja"></div>
+    <div class="detalle">
+      <div>Ingresos<b class="num" id="b-ing">$ 0</b></div>
+      <div style="text-align:center">Gastos<b class="num" id="b-gas">$ 0</b></div>
+      <div style="text-align:right">Debe haber en caja<b class="num" id="b-esp">$ 0</b></div>
+    </div>
+  </div>
+
+  <button class="btn primario" onclick="guardarCierre()">💾 Guardar cierre</button>
+  <button class="btn borde" id="btn-wa" style="display:none" onclick="compartirWA()">📲 Enviar resumen por WhatsApp</button>
+</section>
+
+<!-- ============ VISTA HISTORIAL ============ -->
+<section class="vista" id="v-historial">
+  <h2 class="titulo">Últimos 30 días</h2>
+  <p class="sub">Todas las cajas sumadas, día por día</p>
+
+  <div class="resumen3">
+    <div class="cel"><small>Vendido</small><b class="num" id="r-ing">$ 0</b></div>
+    <div class="cel"><small>Gastado</small><b class="num" id="r-gas">$ 0</b></div>
+    <div class="cel"><small>Ganancia</small><b class="num" id="r-gan" style="color:var(--verde)">$ 0</b></div>
+  </div>
+
+  <div class="carta">
+    <h3>📈 Ganancia por día</h3>
+    <div class="grafica" id="grafica"></div>
+    <div class="eje"><span id="eje-ini"></span><span id="eje-fin"></span></div>
+    <p class="sub" id="mejor-dia" style="margin:10px 0 0"></p>
+  </div>
+
+  <div class="carta">
+    <h3>🗓️ Detalle por día</h3>
+    <div id="lista-dias"><div class="vacio">Todavía no hay cierres guardados</div></div>
+  </div>
+</section>
+
+<!-- ============ VISTA AJUSTES ============ -->
+<section class="vista" id="v-ajustes">
+  <h2 class="titulo">Ajustes</h2>
+  <p class="sub">Tu negocio, tus cajas y tus copias de seguridad</p>
+
+  <div class="carta">
+    <h3>🏪 Nombre del negocio</h3>
+    <input class="entrada" id="aj-negocio" maxlength="40" onchange="guardarNegocio()">
+  </div>
+
+  <div class="carta">
+    <h3>🧾 Cajas</h3>
+    <div id="lista-cajas"></div>
+    <div class="fila2" style="margin-top:12px">
+      <input class="entrada" id="aj-nueva-caja" placeholder="Ej: Caja 2, Mostrador…" maxlength="24" style="font-size:.95rem">
+      <button class="btn suave mini" onclick="agregarCaja()" style="flex:0 0 auto">＋ Agregar</button>
+    </div>
+  </div>
+
+  <div class="carta">
+    <h3>☁️ Copia de seguridad</h3>
+    <p class="sub" style="margin-bottom:12px">Tus datos viven solo en este celular. Descarga una copia cada semana y guárdala en tu correo o Drive.</p>
+    <button class="btn borde" onclick="exportar()">⬇️ Descargar copia (.json)</button>
+    <button class="btn borde" onclick="document.getElementById('importar-archivo').click()">⬆️ Restaurar copia</button>
+    <input type="file" id="importar-archivo" accept=".json" style="display:none" onchange="importar(event)">
+  </div>
+
+  <div class="carta">
+    <h3>🔒 Tus datos</h3>
+    <p class="sub" style="margin:0">Esta app no envía información a internet. Todo queda guardado únicamente en tu teléfono. Si borras los datos del navegador sin tener copia, se pierden los cierres.</p>
+  </div>
+
+  <button class="btn peligro" onclick="borrarTodo()">🗑️ Borrar todos los datos</button>
+</section>
+
+</main>
+
+<footer>Desarrollada por Vibras Positivas HM — Derechos de Autor Reservados</footer>
+
+<!-- NAV -->
+<nav>
+  <button class="activo" data-v="hoy" onclick="irA('hoy')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg>
+    Hoy
+  </button>
+  <button data-v="historial" onclick="irA('historial')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+    Historial
+  </button>
+  <button data-v="ajustes" onclick="irA('ajustes')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+    Ajustes
+  </button>
+</nav>
+
+<!-- MODAL AGREGAR MOVIMIENTO -->
+<div class="velo" id="modal-mov" onclick="if(event.target===this)cerrarMov()">
+  <div class="hoja">
+    <h3 id="mov-titulo">Agregar ingreso</h3>
+    <label class="campo">¿De qué tipo?</label>
+    <select class="entrada" id="mov-cat" style="margin-bottom:12px"></select>
+    <label class="campo">Detalle (opcional)</label>
+    <input class="entrada" id="mov-desc" placeholder="Ej: pedido doña Rosa" maxlength="60" style="font-size:.95rem;margin-bottom:12px">
+    <label class="campo">¿Cuánto?</label>
+    <input class="entrada dinero num" id="mov-monto" inputmode="numeric" placeholder="$ 0" autocomplete="off" style="margin-bottom:16px">
+    <button class="btn primario" id="mov-guardar" onclick="guardarMov()">Agregar</button>
+    <button class="btn borde" onclick="cerrarMov()">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL DETALLE DÍA -->
+<div class="velo" id="modal-dia" onclick="if(event.target===this)this.classList.remove('abierto')">
+  <div class="hoja" id="dia-contenido"></div>
+</div>
+
+<div id="aviso"></div>
+
+<script>
+/* ================= UTILIDADES ================= */
+const CLAVE_CFG='vp_cierre_config', CLAVE_DATOS='vp_cierre_datos';
+
+function hoyColombia(){ // fecha real Colombia UTC-5
+  const d=new Date(Date.now()-5*3600*1000);
+  return d.toISOString().slice(0,10);
+}
+function fechaBonita(iso,corta){
+  const [a,m,d]=iso.split('-').map(Number);
+  const dias=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const f=new Date(Date.UTC(a,m-1,d));
+  const dia=dias[f.getUTCDay()];
+  if(corta) return `${dia.slice(0,3)} ${d} ${meses[m-1]}`;
+  return `${dia.charAt(0).toUpperCase()+dia.slice(1)}, ${d} de ${meses[m-1]} de ${a}`;
+}
+function fmt(n){
+  const neg=n<0; n=Math.abs(Math.round(n));
+  return (neg?'-$ ':'$ ')+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+function leerMonto(el){ return parseInt((el.value||'').replace(/\D/g,''),10)||0; }
+function formatearCampo(el){
+  const v=leerMonto(el);
+  el.value=v? fmt(v):'';
+}
+function aviso(t){
+  const a=document.getElementById('aviso');
+  a.textContent=t; a.classList.add('ver');
+  clearTimeout(a._t); a._t=setTimeout(()=>a.classList.remove('ver'),2200);
+}
+
+/* ================= ESTADO ================= */
+let cfg, datos, cajaActiva, tipoMov='ingreso';
+let borrador={ingresos:[],gastos:[]}; // movimientos de la caja activa hoy
+
+const CATS_ING=['Ventas mostrador','Domicilios','Fiado recuperado','Nequi / Daviplata','Otro ingreso'];
+const CATS_GAS=['Mercancía / Proveedores','Servicios (luz, agua…)','Arriendo','Ayudante / Nómina','Domicilios','Gasto personal','Otro gasto'];
+
+function cargar(){
+  cfg=JSON.parse(localStorage.getItem(CLAVE_CFG)||'null');
+  datos=JSON.parse(localStorage.getItem(CLAVE_DATOS)||'{}');
+  if(!cfg){
+    document.getElementById('bienvenida').classList.add('abierto');
+    cfg={negocio:'Mi negocio',cajas:[{id:'c1',nombre:'Caja 1'}]};
+  }
+  cajaActiva=cfg.cajas[0].id;
+}
+function guardarCfg(){ localStorage.setItem(CLAVE_CFG,JSON.stringify(cfg)); }
+function guardarDatos(){ localStorage.setItem(CLAVE_DATOS,JSON.stringify(datos)); }
+
+function terminarBienvenida(){
+  const n=document.getElementById('ob-negocio').value.trim();
+  if(n) cfg.negocio=n;
+  guardarCfg();
+  document.getElementById('bienvenida').classList.remove('abierto');
+  pintarTodo();
+}
+
+/* ================= NAVEGACIÓN ================= */
+function irA(v){
+  document.querySelectorAll('.vista').forEach(s=>s.classList.remove('activa'));
+  document.getElementById('v-'+v).classList.add('activa');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('activo',b.dataset.v===v));
+  if(v==='historial') pintarHistorial();
+  if(v==='ajustes') pintarAjustes();
+  window.scrollTo(0,0);
+}
+
+/* ================= VISTA HOY ================= */
+function cierreDe(fecha,caja){ return (datos[fecha]||{})[caja]||null; }
+
+function cargarBorrador(){
+  const c=cierreDe(hoyColombia(),cajaActiva);
+  borrador=c? JSON.parse(JSON.stringify(c)) : {base:0,ingresos:[],gastos:[],contado:0,notas:''};
+  const inB=document.getElementById('in-base');
+  const inC=document.getElementById('in-contado');
+  inB.value=borrador.base? fmt(borrador.base):'';
+  inC.value=borrador.contado? fmt(borrador.contado):'';
+  document.getElementById('in-notas').value=borrador.notas||'';
+  pintarMovs();
+  document.getElementById('billete').style.display= c? 'block':'none';
+  document.getElementById('btn-wa').style.display= c? 'flex':'none';
+  if(c) pintarBillete();
+  calcularDif();
+}
+
+function pintarChips(){
+  const hoy=hoyColombia();
+  document.getElementById('chips-cajas').innerHTML=cfg.cajas.map(c=>{
+    const listo=!!cierreDe(hoy,c.id);
+    return `<button class="chip ${c.id===cajaActiva?'activo':''}" onclick="cambiarCaja('${c.id}')">${c.nombre}${listo?'<span class="ok">✔</span>':''}</button>`;
+  }).join('');
+}
+function cambiarCaja(id){ cajaActiva=id; pintarChips(); cargarBorrador(); }
+
+function pintarMovs(){
+  const pinta=(lista,idCont,clase)=>{
+    const cont=document.getElementById(idCont);
+    if(!lista.length){cont.innerHTML='<div class="vacio">Aún no has anotado nada</div>';return;}
+    cont.innerHTML=lista.map((m,i)=>`
+      <div class="mov">
+        <div class="info"><div class="cat">${m.cat}</div>${m.desc?`<div class="desc">${m.desc}</div>`:''}</div>
+        <div class="monto num ${clase}">${fmt(m.monto)}</div>
+        <button class="quitar" onclick="quitarMov('${clase==='ing'?'ingresos':'gastos'}',${i})" aria-label="Quitar">✕</button>
+      </div>`).join('');
+  };
+  pinta(borrador.ingresos,'lista-ingresos','ing');
+  pinta(borrador.gastos,'lista-gastos','gas');
+  document.getElementById('tot-ing').textContent=fmt(suma(borrador.ingresos));
+  document.getElementById('tot-gas').textContent=fmt(suma(borrador.gastos));
+  calcularDif();
+}
+function suma(l){ return l.reduce((s,m)=>s+m.monto,0); }
+function quitarMov(tipo,i){ borrador[tipo].splice(i,1); pintarMovs(); }
+
+function abrirMov(tipo){
+  tipoMov=tipo;
+  document.getElementById('mov-titulo').textContent= tipo==='ingreso'?'Agregar ingreso':'Agregar gasto';
+  document.getElementById('mov-guardar').className='btn '+(tipo==='ingreso'?'primario':'peligro');
+  const cats=tipo==='ingreso'?CATS_ING:CATS_GAS;
+  document.getElementById('mov-cat').innerHTML=cats.map(c=>`<option>${c}</option>`).join('');
+  document.getElementById('mov-desc').value='';
+  document.getElementById('mov-monto').value='';
+  document.getElementById('modal-mov').classList.add('abierto');
+  setTimeout(()=>document.getElementById('mov-monto').focus(),150);
+}
+function cerrarMov(){ document.getElementById('modal-mov').classList.remove('abierto'); }
+function guardarMov(){
+  const monto=leerMonto(document.getElementById('mov-monto'));
+  if(!monto){ aviso('Escribe el valor 💵'); return; }
+  const m={cat:document.getElementById('mov-cat').value,desc:document.getElementById('mov-desc').value.trim(),monto};
+  borrador[tipoMov==='ingreso'?'ingresos':'gastos'].push(m);
+  cerrarMov(); pintarMovs();
+}
+
+function calcularDif(){
+  const base=leerMonto(document.getElementById('in-base'));
+  const contado=leerMonto(document.getElementById('in-contado'));
+  const esperado=base+suma(borrador.ingresos)-suma(borrador.gastos);
+  const el=document.getElementById('dif-caja');
+  el.className='dif';
+  if(!contado){ return; }
+  const dif=contado-esperado;
+  if(dif===0){ el.classList.add('ok'); el.textContent=`✅ Caja cuadrada. Debía haber ${fmt(esperado)} y eso hay.`; }
+  else if(dif>0){ el.classList.add('sobra'); el.textContent=`🟡 Sobran ${fmt(dif)}. Debía haber ${fmt(esperado)}.`; }
+  else{ el.classList.add('falta'); el.textContent=`🔴 Faltan ${fmt(-dif)}. Debía haber ${fmt(esperado)}.`; }
+}
+
+function guardarCierre(){
+  borrador.base=leerMonto(document.getElementById('in-base'));
+  borrador.contado=leerMonto(document.getElementById('in-contado'));
+  borrador.notas=document.getElementById('in-notas').value.trim();
+  if(!borrador.ingresos.length && !borrador.gastos.length){ aviso('Anota al menos un movimiento'); return; }
+  const hoy=hoyColombia();
+  borrador.ts=Date.now();
+  if(!datos[hoy]) datos[hoy]={};
+  datos[hoy][cajaActiva]=JSON.parse(JSON.stringify(borrador));
+  guardarDatos();
+  pintarChips(); pintarBillete();
+  document.getElementById('billete').style.display='block';
+  document.getElementById('btn-wa').style.display='flex';
+  document.getElementById('billete').scrollIntoView({behavior:'smooth',block:'center'});
+  aviso('✅ Cierre guardado');
+}
+
+function pintarBillete(){
+  const ing=suma(borrador.ingresos), gas=suma(borrador.gastos);
+  const gan=ing-gas;
+  const esperado=(borrador.base||leerMonto(document.getElementById('in-base')))+ing-gas;
+  const caja=cfg.cajas.find(c=>c.id===cajaActiva);
+  const v=document.getElementById('b-valor');
+  v.textContent=fmt(gan);
+  v.classList.toggle('negativo',gan<0);
+  document.getElementById('b-serie').textContent='Ganancia del día · '+fechaBonita(hoyColombia(),true);
+  document.getElementById('b-caja').textContent=cfg.negocio+' · '+(caja?caja.nombre:'');
+  document.getElementById('b-ing').textContent=fmt(ing);
+  document.getElementById('b-gas').textContent=fmt(gas);
+  document.getElementById('b-esp').textContent=fmt(esperado);
+}
+
+function compartirWA(){
+  const hoy=hoyColombia();
+  const caja=cfg.cajas.find(c=>c.id===cajaActiva);
+  const ing=suma(borrador.ingresos), gas=suma(borrador.gastos);
+  let t=`*🏪 ${cfg.negocio} — Cierre del día*\n${fechaBonita(hoy)}\n${caja?('Caja: '+caja.nombre):''}\n\n`;
+  t+=`💵 *Ingresos: ${fmt(ing)}*\n`;
+  borrador.ingresos.forEach(m=>t+=`  • ${m.cat}${m.desc?' ('+m.desc+')':''}: ${fmt(m.monto)}\n`);
+  t+=`\n💸 *Gastos: ${fmt(gas)}*\n`;
+  borrador.gastos.forEach(m=>t+=`  • ${m.cat}${m.desc?' ('+m.desc+')':''}: ${fmt(m.monto)}\n`);
+  t+=`\n📈 *GANANCIA: ${fmt(ing-gas)}*\n`;
+  const base=borrador.base||0, contado=borrador.contado||0;
+  if(base) t+=`Base de caja: ${fmt(base)}\n`;
+  t+=`Debe haber en caja: ${fmt(base+ing-gas)}\n`;
+  if(contado){ const d=contado-(base+ing-gas); t+= d===0?'✅ Caja cuadrada\n': (d>0?`🟡 Sobrante: ${fmt(d)}\n`:`🔴 Faltante: ${fmt(-d)}\n`); }
+  if(borrador.notas) t+=`\n📝 ${borrador.notas}\n`;
+  t+=`\n_App Cierre Diario · Vibras Positivas HM_`;
+  window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
+}
+
+/* ================= HISTORIAL ================= */
+function totalesDia(fecha){
+  const cajas=datos[fecha]||{};
+  let ing=0,gas=0,n=0;
+  Object.values(cajas).forEach(c=>{ ing+=suma(c.ingresos); gas+=suma(c.gastos); n++; });
+  return {ing,gas,gan:ing-gas,n};
+}
+function pintarHistorial(){
+  const hoy=hoyColombia();
+  const fechas=[];
+  for(let i=29;i>=0;i--){
+    const d=new Date(Date.now()-5*3600*1000-i*86400000);
+    fechas.push(d.toISOString().slice(0,10));
+  }
+  let tIng=0,tGas=0,mejor=null;
+  const serie=fechas.map(f=>{
+    const t=totalesDia(f);
+    tIng+=t.ing; tGas+=t.gas;
+    if(t.n && (!mejor||t.gan>mejor.gan)) mejor={f,gan:t.gan};
+    return {f,...t};
+  });
+  document.getElementById('r-ing').textContent=fmt(tIng);
+  document.getElementById('r-gas').textContent=fmt(tGas);
+  document.getElementById('r-gan').textContent=fmt(tIng-tGas);
+
+  const max=Math.max(...serie.map(s=>Math.abs(s.gan)),1);
+  document.getElementById('grafica').innerHTML=serie.map(s=>{
+    const h=Math.max(3,Math.round(Math.abs(s.gan)/max*110));
+    const cls=s.gan<0?'neg':(mejor&&s.f===mejor.f?'mejor':'');
+    return `<div class="barra ${cls}" style="height:${h}px" title="${fechaBonita(s.f,true)}: ${fmt(s.gan)}"></div>`;
+  }).join('');
+  document.getElementById('eje-ini').textContent=fechaBonita(fechas[0],true);
+  document.getElementById('eje-fin').textContent='Hoy';
+  const diasCon=serie.filter(s=>s.n).length;
+  document.getElementById('mejor-dia').innerHTML= mejor
+    ? `⭐ Tu mejor día fue <b>${fechaBonita(mejor.f,true)}</b> con <b style="color:var(--verde)">${fmt(mejor.gan)}</b>. Promedio diario: <b>${fmt((tIng-tGas)/Math.max(diasCon,1))}</b> (${diasCon} día${diasCon===1?'':'s'} con cierre).`
+    : 'Guarda tu primer cierre y aquí verás cómo va el negocio.';
+
+  const conDatos=serie.filter(s=>s.n).reverse();
+  document.getElementById('lista-dias').innerHTML= conDatos.length
+    ? conDatos.map(s=>`
+      <div class="dia-item" onclick="verDia('${s.f}')">
+        <div><div class="f">${fechaBonita(s.f,true)}</div><div class="c">${s.n} caja${s.n===1?'':'s'} · Ing ${fmt(s.ing)} · Gas ${fmt(s.gas)}</div></div>
+        <div class="g num ${s.gan>=0?'pos':'neg'}">${fmt(s.gan)}</div>
+      </div>`).join('')
+    : '<div class="vacio">Todavía no hay cierres guardados</div>';
+}
+
+function verDia(fecha){
+  const cajas=datos[fecha]||{};
+  let html=`<h3>${fechaBonita(fecha)}</h3>`;
+  Object.entries(cajas).forEach(([id,c])=>{
+    const caja=cfg.cajas.find(x=>x.id===id);
+    const ing=suma(c.ingresos), gas=suma(c.gastos);
+    html+=`<div class="carta"><h3>🧾 ${caja?caja.nombre:id}</h3>`;
+    if(c.base) html+=`<div class="mov"><div class="info"><div class="cat">Base de caja</div></div><div class="monto num">${fmt(c.base)}</div></div>`;
+    c.ingresos.forEach(m=>html+=`<div class="mov"><div class="info"><div class="cat">${m.cat}</div>${m.desc?`<div class="desc">${m.desc}</div>`:''}</div><div class="monto num ing">${fmt(m.monto)}</div></div>`);
+    c.gastos.forEach(m=>html+=`<div class="mov"><div class="info"><div class="cat">${m.cat}</div>${m.desc?`<div class="desc">${m.desc}</div>`:''}</div><div class="monto num gas">-${fmt(m.monto).slice(2)}</div></div>`);
+    html+=`<div class="total-linea"><span>Ganancia</span><span class="num" style="color:${ing-gas>=0?'var(--verde)':'var(--gasto)'}">${fmt(ing-gas)}</span></div>`;
+    if(c.contado){ const d=c.contado-((c.base||0)+ing-gas); html+=`<p class="sub" style="margin:8px 0 0">Contado: ${fmt(c.contado)} · ${d===0?'✅ cuadrada':(d>0?'🟡 sobrante '+fmt(d):'🔴 faltante '+fmt(-d))}</p>`; }
+    if(c.notas) html+=`<p class="sub" style="margin:8px 0 0">📝 ${c.notas}</p>`;
+    html+=`</div>`;
+  });
+  html+=`<button class="btn borde" onclick="document.getElementById('modal-dia').classList.remove('abierto')">Cerrar</button>`;
+  document.getElementById('dia-contenido').innerHTML=html;
+  document.getElementById('modal-dia').classList.add('abierto');
+}
+
+/* ================= AJUSTES ================= */
+function pintarAjustes(){
+  document.getElementById('aj-negocio').value=cfg.negocio;
+  document.getElementById('lista-cajas').innerHTML=cfg.cajas.map(c=>`
+    <div class="caja-item">
+      <span>🧾 ${c.nombre}</span>
+      ${cfg.cajas.length>1?`<button class="btn peligro mini" onclick="quitarCaja('${c.id}')">Quitar</button>`:''}
+    </div>`).join('');
+}
+function guardarNegocio(){
+  const n=document.getElementById('aj-negocio').value.trim();
+  if(n){ cfg.negocio=n; guardarCfg(); pintarTodo(); aviso('Nombre guardado'); }
+}
+function agregarCaja(){
+  const el=document.getElementById('aj-nueva-caja');
+  const n=el.value.trim();
+  if(!n){ aviso('Escribe el nombre de la caja'); return; }
+  cfg.cajas.push({id:'c'+Date.now(),nombre:n});
+  el.value=''; guardarCfg(); pintarAjustes(); pintarChips(); aviso('Caja agregada');
+}
+function quitarCaja(id){
+  if(!confirm('¿Quitar esta caja? Los cierres ya guardados no se borran.')) return;
+  cfg.cajas=cfg.cajas.filter(c=>c.id!==id);
+  if(cajaActiva===id) cajaActiva=cfg.cajas[0].id;
+  guardarCfg(); pintarAjustes(); pintarChips(); cargarBorrador();
+}
+function exportar(){
+  const copia={config:cfg,datos,exportado:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(copia,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`cierre-diario-${cfg.negocio.replace(/\s+/g,'-').toLowerCase()}-${hoyColombia()}.json`;
+  a.click();
+  aviso('Copia descargada ✅');
+}
+function importar(ev){
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const c=JSON.parse(r.result);
+      if(!c.config||!c.datos) throw 0;
+      if(!confirm('Esto reemplaza los datos actuales por los de la copia. ¿Continuar?')) return;
+      cfg=c.config; datos=c.datos; cajaActiva=cfg.cajas[0].id;
+      guardarCfg(); guardarDatos(); pintarTodo(); aviso('Copia restaurada ✅');
+    }catch(e){ aviso('Ese archivo no es una copia válida'); }
+  };
+  r.readAsText(f);
+  ev.target.value='';
+}
+function borrarTodo(){
+  if(!confirm('⚠️ Se borrarán TODOS los cierres y ajustes de este celular. ¿Seguro?')) return;
+  if(!confirm('Última pregunta: ¿ya descargaste una copia de seguridad?')) return;
+  localStorage.removeItem(CLAVE_CFG); localStorage.removeItem(CLAVE_DATOS);
+  location.reload();
+}
+
+/* ================= ARRANQUE ================= */
+function pintarTodo(){
+  document.getElementById('h-negocio').textContent=cfg.negocio;
+  document.getElementById('h-fecha').textContent=fechaBonita(hoyColombia());
+  pintarChips(); cargarBorrador();
+}
+['in-base','in-contado'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener('input',()=>{formatearCampo(el);calcularDif();});
+});
+document.getElementById('mov-monto').addEventListener('input',e=>formatearCampo(e.target));
+
+cargar(); pintarTodo();
+</script>
+</body>
+</html>
